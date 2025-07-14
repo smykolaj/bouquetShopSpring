@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Payment</title>
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    body{font-family:sans-serif;margin:0;background:#fff}
+    header{background:#e6e6e6;padding:1em 2em;display:flex;justify-content:space-between;align-items:center}
+    header nav a{margin:0 10px;text-decoration:none;color:#000;font-weight:bold}
+    .logo{font-family:'Kaushan Script',cursive;font-size:2em}
+    .wrapper{max-width:900px;margin:2em auto;background:#c8d0a8;padding:2em;border-radius:8px}
+    h2{margin-top:0}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:.6em .4em;text-align:left}
+    th{font-weight:bold}
+    tr:not(:last-child){border-bottom:1px solid #333}
+    .pay{margin-top:2em;text-align:center}
+    .btn{background:#f58220;border:none;padding:.8em 1.6em;font-weight:bold;cursor:pointer;margin:0 .5em;border-radius:5px}
+    .btn:hover{background:#e47010}
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">Kwiat życia</div>
+  <nav>
+    <a href="/catalogue">Shop</a>
+    <a href="#">Delivery&nbsp;&amp;&nbsp;payment</a>
+    <a href="#">About&nbsp;us</a>
+    <a href="#">Contact</a>
+  </nav>
+</header>
+
+<div class="wrapper">
+  <h2>Your order</h2>
+
+  <table>
+    <tr><th>Product</th><th style="white-space:nowrap">Price</th></tr>
+
+    <tr th:each="ob : ${order.orderBouquets}">
+      <td th:text="${ob.bouquet.name} + ' × ' + ${ob.quantity}">Bouquet x2</td>
+      <td th:text="${#numbers.formatDecimal(ob.bouquet.getTotalPrice() * ob.quantity, 2,'COMMA',2,'POINT')} + ' zł'">
+        120,50 zł
+      </td>
+    </tr>
+
+    <tr th:if="${order.getDeliveryAddress()!= null}">
+      <td>Delivery</td>
+      <td th:text="${#numbers.formatDecimal(order.deliveryBasePrice,2,'COMMA',2,'POINT')} + ' zł'">25,00 zł</td>
+    </tr>
+
+    <tr style="font-weight:bold">
+      <td>Total</td>
+      <td th:text="${#numbers.formatDecimal(order.price,2,'COMMA',2,'POINT')} + ' zł'">145,50 zł</td>
+    </tr>
+  </table>
+
+  <div class="pay">
+    <form th:action="@{|/payment/${order.id}/cash|}" method="post" style="display:inline">
+      <button class="btn">Pay&nbsp;by&nbsp;cash</button>
+    </form>
+    <form th:action="@{|/payment/${order.id}/card|}" method="post" style="display:inline">
+      <button class="btn">Pay&nbsp;by&nbsp;card</button>
+    </form>
+  </div>
+</div>
+</body>
+</html>

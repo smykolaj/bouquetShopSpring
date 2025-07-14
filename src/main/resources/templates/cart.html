@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Your cart</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #fff;
+        }
+        img{width:90px;height:90px;object-fit:cover;border-radius:4px}
+        header {
+            background: #e6e6e6;
+            padding: 1em 2em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .logo {
+            font-family: 'Kaushan Script', cursive;
+            font-size: 2em;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            padding: 2em;
+            display: flex;
+            gap: 2em;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 0.7em;
+        }
+
+        th {
+            border-bottom: 2px solid #333;
+        }
+
+        .product-row {
+            vertical-align: top;
+            border-bottom: 1px solid #aaa;
+        }
+
+        .product-img {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .comment-box {
+            width: 95%;
+            height: 60px;
+        }
+
+        .qty-form {
+            display: flex;
+            align-items: center;
+            gap: 0.3em;
+        }
+
+        .qty-form button {
+            background-color: #f58220;
+            border: none;
+            color: black;
+            padding: 0.4em;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .delete-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #f58220;
+            cursor: pointer;
+        }
+
+        .summary {
+            background-color: #c6cfa2;
+            padding: 2em;
+            width: 250px;
+            font-weight: bold;
+        }
+
+        .checkout-btn {
+            display: block;
+            margin-top: 1em;
+            background-color: #f58220;
+            border: none;
+            padding: 0.6em 1.2em;
+            font-weight: bold;
+            color: black;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">Kwiat życia</div>
+    <nav>
+        <a href="/catalogue">Shop</a>
+        <a href="#">Delivery & payment</a>
+        <a href="#">About us</a>
+        <a href="#">Contact</a>
+        <a href="/cart" class="fa fa-shopping-cart" style="font-size:30px;color:#f58220"></a>
+    </nav>
+</header>
+
+<div class="container">
+    <div style="flex: 1">
+        <table>
+            <thead>
+            <tr>
+                <th>Product</th>
+                <th>Price</th>
+                <th>Amount</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr class="product-row" th:each="entry : ${cart.items}">
+                <td>
+                    <form th:action="@{/cart/remove/{i}(i=${entry.getKey().getId()})}" method="post" style="float:left;margin-right:1em">
+                        <button class="delete-button">🗑</button>
+                    </form>
+                    <img th:src="@{/images/{imageName}.jpg(imageName=${#strings.replace(entry.getKey().getName().toLowerCase(), ' ', '-')})}" alt="Bouquet image"/>
+                    <div><b th:text="${entry.key.name}">Name</b></div>
+                </td>
+                <td th:text="${#numbers.formatDecimal(entry.key.getTotalPrice(), 1, 'COMMA', 1, 'POINT')} + ' zł'">325 zł</td>
+                <td>
+                    <form class="qty-form" th:action="@{/cart/change}" method="post">
+                        <input type="hidden" name="id" th:value="${entry.key.id}" />
+                        <input type="hidden" name="currentQty" th:value="${entry.value}" />
+                        <span th:text="${entry.value}">1</span>
+                        <button name="change" value="1" type="submit">⬆</button>
+                        <button name="change" value="-1" type="submit" th:if="${entry.value > 1}">⬇</button>
+                    </form>
+                </td>
+                <td th:text="${#numbers.formatDecimal(entry.key.getTotalPrice() * entry.value, 1, 'COMMA', 1, 'POINT')} + ' zł'">325 zł</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <div class="summary">
+        <p th:text="${'Cart size: ' + (cart.items.size())}"></p>
+
+        <div>Cart total</div>
+        <div>Amount <span th:text="${#numbers.formatDecimal(cart.total, 2, 'COMMA', 2, 'POINT')}"></span>
+        </div>
+        <form action="/cart/checkout" method="post">
+            <label for="preference">Comment for the order:</label><br>
+            <textarea id="preference" name="preference" class="comment-box" placeholder="Any special notes?"></textarea>
+
+            <button th:if="${!cart.items.isEmpty()}" class="checkout-btn">Proceed to checkout</button>
+        </form>
+
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #fff;
+        }
+
+        header {
+            background: #e6e6e6;
+            padding: 1em 2em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .logo {
+            font-family: 'Kaushan Script', cursive;
+            font-size: 2em;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 2em;
+            display: flex;
+            gap: 2em;
+        }
+
+
+        .delivery-options label {
+            display: block;
+            margin-bottom: 0.5em;
+        }
+
+
+        .loyalty span {
+            background-color: #f58220;
+            font-size: 0.8em;
+            padding: 0.2em 0.5em;
+            border-radius: 5px;
+            margin-left: 0.5em;
+        }
+
+
+        .delivery-details input {
+            display: block;
+            width: 250px;
+            margin-bottom: 0.8em;
+            padding: 0.5em;
+            border: 1px solid #f58220;
+            border-radius: 4px;
+        }
+
+
+        .date-picker input {
+            width: 100%;
+            padding: 0.5em;
+            margin-bottom: 0.5em;
+            border: 1px solid #f58220;
+        }
+
+        .order-summary h3 {
+            margin-top: 0;
+        }
+
+        .order-summary div {
+            margin-bottom: 1em;
+        }
+
+        .order-summary .item {
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5em;
+            margin-bottom: 0.5em;
+        }
+
+
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #fff;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1100px;
+            margin: auto;
+            padding: 2em;
+        }
+
+        .left, .right {
+            background-color: #dbe3b9;
+            padding: 2em;
+        }
+
+        .left {
+            flex: 2;
+            margin-right: 2em;
+        }
+
+        .right {
+            width: 300px;
+        }
+
+        .section {
+            margin-bottom: 1.5em;
+        }
+
+        .radio-group label {
+            display: block;
+            margin: 0.5em 0;
+        }
+
+        .input-group input {
+            display: block;
+            margin: 0.3em 0;
+            padding: 0.3em;
+            width: 100%;
+        }
+
+        .btn {
+            background-color: #f58220;
+            border: none;
+            padding: 0.6em 1em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+    <script>
+        function toggleAddressFields() {
+            const deliveryRadio = document.getElementById('delivery');
+            const isDelivery = deliveryRadio.checked;
+
+            document.getElementById('address-fields').style.display = isDelivery ? 'block' : 'none';
+            document.getElementById('points-section').style.display = isDelivery ? 'block' : 'none';
+
+            document.getElementById('city').required = isDelivery;
+            document.getElementById('street').required = isDelivery;
+            document.getElementById('number').required = isDelivery;
+
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const delivery = document.getElementById('delivery').checked;
+            const redeem = document.getElementById('redeem')?.checked || false;
+            const deliveryCost = delivery && !redeem ? 25 : 0;
+
+            const baseTotal = parseFloat(document.getElementById('cartTotal').dataset.base);
+            const total = (baseTotal + deliveryCost).toFixed(2)
+                .replace('.', ',')
+                .replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+            document.getElementById('delivery-cost').textContent = deliveryCost > 0 ? `Delivery: ${deliveryCost} zł` : '';
+            document.getElementById('total-price').textContent = `${total} zł`;
+        }
+
+        window.onload = function () {
+            toggleAddressFields();
+
+            document.getElementsByName('deliveryType').forEach(radio => {
+                radio.addEventListener('change', toggleAddressFields);
+            });
+
+            document.getElementById('redeem')?.addEventListener('change', updateSummary);
+        }
+    </script>
+</head>
+<body onload="toggleAddressFields()">
+<header>
+    <div class="logo">Kwiat życia</div>
+    <nav>
+        <a href="/catalogue">Shop</a>
+        <a href="#">Delivery & payment</a>
+        <a href="#">About us</a>
+        <a href="#">Contact</a>
+        <a href="/cart" class="fa fa-shopping-cart" style="font-size:30px;color:#f58220"></a>
+    </nav>
+</header>
+<div class="container">
+    <form th:action="@{/cart/checkout/confirm}" method="post" th:object="${order}" class="left">
+        <input type="hidden" name="preference" th:value="${order.specialPreference}"/>
+        <div class="section">
+            <h3>Choose delivery option</h3>
+            <div class="radio-group">
+                <label>
+                    <input type="radio" name="deliveryType" value="pickup" onchange="toggleAddressFields()" checked> In
+                    store
+                    pickup</label>
+                <label><input type="radio" name="deliveryType" value="delivery" id="delivery"
+                              onchange="toggleAddressFields()"> Delivery to specified location</label>
+            </div>
+        </div>
+
+        <div class="section" th:if="${user != null}">
+            <p><strong>Logged in as:</strong> <span th:text="${user.name}"></span></p>
+            <p id="points-section">
+                Loyalty points: <span th:text="${user.loyaltyPoints}"></span>
+                (<span>10 needed for free delivery</span>)
+                <label th:if="${user.loyaltyPoints >= 10}">
+                    <input type="checkbox" name="redeem" value="true" id="redeem" onchange="updateSummary()"/>
+                    Redeem free delivery
+                </label></p>
+        </div>
+
+        <div class="section" id="address-fields">
+            <h4>Delivery details</h4>
+            <div class="input-group">
+                <label>City</label>
+                <input type="text" name="city" id="city"/>
+
+                <label>Street</label>
+                <input type="text" name="street" id="street"/>
+
+                <label>Number</label>
+                <input type="text" name="number" id="number"/>
+            </div>
+        </div>
+
+        <div class="section">
+            <h4>Select date and time</h4>
+            <input type="datetime-local" name="deliveryDate" required/>
+        </div>
+
+        <button type="submit" class="btn">Proceed to payment</button>
+    </form>
+
+    <div class="right">
+        <h3>Your order</h3>
+        <div th:each="entry : ${cart.items}">
+            <p><strong th:text="${entry.key.name}"></strong> x<span th:text="${entry.value}"></span><br/>
+            <p th:text="${#numbers.formatDecimal(entry.key.getTotalPrice() * entry.value, 2, 'COMMA', 2, 'POINT')}+ ' zł'"></p>
+            <hr/>
+        </div>
+
+        <span id="cartTotal" th:data-base="${cart.total}" style="display:none"></span>
+        <p id="delivery-cost"></p>
+        <h4>Total: <span id="total-price"></span></h4>
+    </div>
+</div>
+</body>
+</html>

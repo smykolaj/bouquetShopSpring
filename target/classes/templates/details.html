@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Thank you</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background: #fff
+        }
+
+        header {
+            background: #e6e6e6;
+            padding: 1em 2em;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header nav a {
+            margin: 0 10px;
+            text-decoration: none;
+            color: #000;
+            font-weight: bold;
+        }
+
+
+        .logo {
+            font-family: 'Kaushan Script', cursive;
+            font-size: 2em
+        }
+
+        .wrapper {
+            max-width: 1000px;
+            margin: 2em auto;
+            background: #c8d0a8;
+            padding: 2em;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between
+        }
+
+        .summary, .right {
+            width: 45%
+        }
+
+        .summary hr {
+            border: none;
+            border-top: 1px solid #333
+        }
+
+        .loyalty {
+            margin-top: 2em;
+            padding: 1em;
+            background: #888066;
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 5px
+        }
+
+        .btn {
+            background: #f58220;
+            border: none;
+            padding: 1em 2em;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            margin-top: 2em;
+            display: block;
+            text-align: center;
+            text-decoration: none;
+            color: #000;
+            border-radius: 5px
+        }
+
+        .btn:hover {
+            background: #e47010
+        }
+
+        .right span.label {
+            font-weight: bold;
+            display: inline-block;
+            width: 70px
+        }
+    </style>
+</head>
+<body>
+<header>
+    <div class="logo">Kwiat życia</div>
+    <nav>
+        <a href="/catalogue">Shop</a>
+        <a href="#">Delivery & payment</a>
+        <a href="#">About us</a>
+        <a href="#">Contact</a>
+        <a href="/cart" class="fa fa-shopping-cart" style="font-size:30px;color:#f58220"></a>
+    </nav>
+</header>
+
+<div class="wrapper">
+    <div class="summary">
+        <h2>Your order</h2>
+        <div th:each="ob : ${order.orderBouquets}">
+            <p>
+                <strong th:text="${ob.bouquet.name}"></strong>
+                <span th:text="'x' + ${ob.quantity}"></span>
+            </p>
+            <hr/>
+        </div>
+    </div>
+
+    <div class="right">
+        <h3>Delivery details</h3>
+        <div th:if="${order.deliveryAddress!=null}">
+            <p><span class="label">City</span>
+                <span th:text="${order.deliveryAddress!=null ? order.deliveryAddress.split(' ')[0] : '—'}"></span></p>
+
+            <p><span class="label">Street</span>
+                <span th:text="${order.deliveryAddress!=null ? order.deliveryAddress.split(' ')[1] : '—'}"></span></p>
+
+            <p><span class="label">Number</span>
+                <span th:text="${order.deliveryAddress!=null ? order.deliveryAddress.split(' ')[2] : '—'}"></span></p>
+        </div>
+        <p><span class="label">Date</span>
+            <span th:text="${#temporals.format(order.deliveryDate, 'dd.MM.yyyy')}"></span></p>
+
+        <p><span class="label">Time</span>
+            <span th:text="${#temporals.format(order.deliveryDate, 'HH:mm')}"></span></p>
+    </div>
+</div>
+
+<div class="wrapper" style="flex-direction:column;align-items:center">
+    <div class="loyalty">1 loyalty point earned!</div>
+    <a href="/catalogue" class="btn">Continue to main page</a>
+</div>
+</body>
+</html>
